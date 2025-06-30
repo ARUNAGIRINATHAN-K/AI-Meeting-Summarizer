@@ -67,27 +67,10 @@ F --> G[Return Summary & Actions to Frontend]
 ```
 
 ## 📌 Workflow Diagram with Tools/Platforms
-```
-graph TD
-    A[User Interface (HTML/CSS/JS)]
-    B[Flask Backend (Python)]
-    C[File Upload (Audio/Video)]
-    D[Transcription<br>OpenAI Whisper / Whisper.cpp]
-    E[Summarization<br>OpenAI GPT / BERT via HuggingFace]
-    F[Action Item Extractor]
-    G[Output JSON/TXT File]
-    H[Results Display<br>(Frontend)]
-    I[Deployment (Optional)<br>Render / Railway / Vercel]
 
-    A -->|Upload File| B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> H
-    B --> I
-```
+
+![flow](AI-MeetingSummarizer.png)
+
 
 ## 🔧 Tools & Platforms Summary
 | Step                      | Tools/Platform                            |

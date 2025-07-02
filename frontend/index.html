@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Meeting Summarizer</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>AI Meeting Summarizer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Meeting Summarizer</h1>
-    <input type="file" id="fileInput" accept=".mp3,.mp4,.wav">
-    <button onclick="uploadFile()">Upload</button>
-    <div id="results">
-        <h2>Transcription</h2>
-        <p id="transcription"></p>
-        <h2>Summary</h2>
-        <p id="summary"></p>
-        <h2>Action Items</h2>
-        <ul id="action-items"></ul>
+  <div class="container">
+    <h1>AI Meeting Summarizer</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="file" id="file" accept="audio/*,video/*" required>
+      <button type="submit">Upload and Summarize</button>
+    </form>
+
+    <div id="loading" style="display:none;">Processing…</div>
+
+    <div id="result">
+      <h2>Summary:</h2>
+      <pre id="summaryText"></pre>
+      <h2>Action Items:</h2>
+      <pre id="actionItemsText"></pre>
     </div>
-    <script src="script.js"></script>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

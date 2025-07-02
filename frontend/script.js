@@ -1,31 +1,40 @@
-async function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (!file) {
-        alert('Please select a file');
-        return;
+document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("file");
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Please select a file.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  // Show loading
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("result").style.display = "none";
+
+  try {
+    const response = await fetch("/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById("summaryText").textContent = data.summary;
+      document.getElementById("actionItemsText").textContent = data.action_items.join("\n");
+    } else {
+      alert("Error: " + (data.error || "Something went wrong."));
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const response = await fetch('http://localhost:5000/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-
-        document.getElementById('transcription').textContent = data.transcription;
-        document.getElementById('summary').textContent = data.summary;
-        const actionItems = document.getElementById('action-items');
-        actionItems.innerHTML = data.action_items.split('\n').map(item => `<li>${item}</li>`).join('');
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while processing the file');
-    }
-}
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    alert("Something went wrong. Check console for details.");
+  } finally {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("result").style.display = "block";
+  }
+});

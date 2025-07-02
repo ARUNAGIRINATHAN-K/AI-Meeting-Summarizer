@@ -1,47 +1,63 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
-from whisper import transcribe_audio
+from transcriber import transcribe_audio
 from summarizer import summarize_text, extract_action_items
-from utils import validate_file
-
-app = Flask(__name__)
+from utils import convert_video_to_audio
 
 UPLOAD_FOLDER = 'uploads'
-OUTPUT_FOLDER = 'output'
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'mp4', 'm4a'}
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB limit
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+        return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
-    if not validate_file(file.filename):
-        return jsonify({'error': 'Invalid file format'}), 400
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(file_path)
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
 
-    try:
+        print("[INFO] File saved:", filepath)
+
+        # Convert to audio if needed
+        if filename.endswith('.mp4'):
+            audio_path = convert_video_to_audio(filepath)
+        else:
+            audio_path = filepath
+
         # Transcribe
-        transcription = transcribe_audio(file_path)
-        transcription_path = os.path.join(OUTPUT_FOLDER, f"{filename}.txt")
-        with open(transcription_path, 'w') as f:
-            f.write(transcription)
+        transcript = transcribe_audio(audio_path)
 
-        # Summarize and extract action items
-        summary = summarize_text(transcription)
-        action_items = extract_action_items(transcription)
+        # Summarize
+        summary = summarize_text(transcript)
+
+        # Extract action items
+        actions = extract_action_items(transcript)
 
         return jsonify({
-            'transcription': transcription,
             'summary': summary,
-            'action_items': action_items
+            'action_items': actions
         })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+
+    return jsonify({'error': 'Invalid file type'}), 400
+
+@app.route('/')
+def serve_frontend():
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:path>')
+def static_proxy(path):
+    return send_from_directory('../frontend', path)
 
 if __name__ == '__main__':
     app.run(debug=True)

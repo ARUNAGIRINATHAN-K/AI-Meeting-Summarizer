@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Meeting Summarizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Meeting Summarizer</h1>
+    <input type="file" id="fileInput" accept=".mp3,.mp4,.wav">
+    <button onclick="uploadFile()">Upload</button>
+    <div id="results">
+        <h2>Transcription</h2>
+        <p id="transcription"></p>
+        <h2>Summary</h2>
+        <p id="summary"></p>
+        <h2>Action Items</h2>
+        <ul id="action-items"></ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
